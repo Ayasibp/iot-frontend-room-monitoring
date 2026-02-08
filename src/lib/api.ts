@@ -30,19 +30,22 @@ export const api: KyInstance = ky.create({
         if (response.status === 401) {
           try {
             const refreshResponse = await refreshClient.post('auth/refresh').json<{
-              access_token: string
-              user: {
-                id: number
-                username: string
-                role: 'admin' | 'user'
+              success: boolean
+              data: {
+                access_token: string
+                user: {
+                  id: number
+                  username: string
+                  role: 'admin' | 'user'
+                }
               }
             }>()
 
             // Update the store with the new token and user
-            useAuthStore.getState().setAuth(refreshResponse.user, refreshResponse.access_token)
+            useAuthStore.getState().setAuth(refreshResponse.data.user, refreshResponse.data.access_token)
 
             // Retry the original request with the new token
-            request.headers.set('Authorization', `Bearer ${refreshResponse.access_token}`)
+            request.headers.set('Authorization', `Bearer ${refreshResponse.data.access_token}`)
             return ky(request)
           } catch (error) {
             // Refresh failed, clear auth and redirect to login
