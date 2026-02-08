@@ -11,10 +11,11 @@ import type { TheaterState } from '@/types/theater'
 import { toast } from 'sonner'
 
 interface CountdownWidgetProps {
+  roomId: number
   roomState: TheaterState
 }
 
-export function CountdownWidget({ roomState }: CountdownWidgetProps) {
+export function CountdownWidget({ roomId, roomState }: CountdownWidgetProps) {
   const isAdmin = useAuthStore((state) => state.isAdmin)
   const [remainingTime, setRemainingTime] = useState(0)
   const [isComplete, setIsComplete] = useState(false)
@@ -40,7 +41,8 @@ export function CountdownWidget({ roomState }: CountdownWidgetProps) {
       if (remaining === 0 && !isComplete) {
         setIsComplete(true)
         // Optional: Play sound or show notification
-        toast.success(`Timer for ${roomState.room_name} has finished.`, {
+        const roomName = roomState.room?.room_name || roomState.room_name || 'Room'
+        toast.success(`Timer for ${roomName} has finished.`, {
           description: 'Countdown Complete!',
         })
       }
@@ -68,11 +70,11 @@ export function CountdownWidget({ roomState }: CountdownWidgetProps) {
   }, [roomState, remainingTime])
 
   const handleStart = async () => {
-    if (!roomState?.room_name) return
+    if (!roomId) return
 
     try {
       setIsLoading(true)
-      await roomService.controlCountdownTimer(roomState.room_name, {
+      await roomService.controlCountdownTimer(roomId, {
         action: 'start',
         duration_minutes: durationMinutes,
       })
@@ -85,11 +87,11 @@ export function CountdownWidget({ roomState }: CountdownWidgetProps) {
   }
 
   const handleStop = async () => {
-    if (!roomState?.room_name) return
+    if (!roomId) return
 
     try {
       setIsLoading(true)
-      await roomService.controlCountdownTimer(roomState.room_name, {
+      await roomService.controlCountdownTimer(roomId, {
         action: 'stop',
       })
       toast.success('Timer has been paused.')
@@ -101,11 +103,11 @@ export function CountdownWidget({ roomState }: CountdownWidgetProps) {
   }
 
   const handleReset = async () => {
-    if (!roomState?.room_name) return
+    if (!roomId) return
 
     try {
       setIsLoading(true)
-      await roomService.controlCountdownTimer(roomState.room_name, {
+      await roomService.controlCountdownTimer(roomId, {
         action: 'reset',
       })
       setIsComplete(false)
@@ -118,11 +120,11 @@ export function CountdownWidget({ roomState }: CountdownWidgetProps) {
   }
 
   const handleAdjust = async (minutes: 1 | -1) => {
-    if (!roomState?.room_name) return
+    if (!roomId) return
 
     try {
       setIsLoading(true)
-      await roomService.adjustCountdownTimer(roomState.room_name, minutes)
+      await roomService.adjustCountdownTimer(roomId, minutes)
       toast.success(`${minutes > 0 ? 'Added' : 'Subtracted'} 1 minute.`)
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Failed to adjust countdown timer')

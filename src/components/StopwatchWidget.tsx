@@ -9,7 +9,7 @@ import { useAuthStore } from '@/store/auth'
 import type { TheaterState } from '@/types/theater'
 
 interface StopwatchWidgetProps {
-  roomId: string
+  roomId: number
   roomState: TheaterState
 }
 
