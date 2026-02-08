@@ -8,12 +8,14 @@ interface ACHWidgetProps {
   theoretical: number
   empirical: number
   ahuCycleStartTime: string | null
+  logicAhu: boolean
 }
 
 export function ACHWidget({
   theoretical,
   empirical,
   ahuCycleStartTime,
+  logicAhu,
 }: ACHWidgetProps) {
   const [elapsedTime, setElapsedTime] = useState(0)
   const [currentTime, setCurrentTime] = useState(new Date())
@@ -117,7 +119,16 @@ export function ACHWidget({
                 <Badge variant="secondary">Stable</Badge>
               )}
             </div>
-            {isMeasuring ? (
+            {!logicAhu ? (
+              <div className="space-y-2">
+                <div className="text-4xl font-bold text-gray-400">
+                  00:00:00
+                </div>
+                <p className="text-xs text-gray-500">
+                  AHU logic is off
+                </p>
+              </div>
+            ) : isMeasuring ? (
               <div className="space-y-2">
                 <div className="text-4xl font-bold text-blue-600">
                   {formatDuration(elapsedTime)}
@@ -129,7 +140,8 @@ export function ACHWidget({
             ) : (
               <div className="space-y-2">
                 <div className="text-4xl font-bold text-purple-600">
-                  {formatDuration(0)}
+                  {empirical.toFixed(2)}
+                  <span className="text-lg text-gray-500 ml-2">ACH</span>
                 </div>
                 <p className="text-xs text-gray-500">
                   Based on measured cycle time

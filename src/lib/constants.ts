@@ -10,8 +10,6 @@ export const SENSOR_THRESHOLDS = {
   carbon: { max: 5, warning: 3 },
 }
 
-export const ROOM_IDS = ['OT-01', 'OT-02', 'OT-03']
-
 export const API_ENDPOINTS = {
   AUTH: {
     LOGIN: 'auth/login',
@@ -23,6 +21,17 @@ export const API_ENDPOINTS = {
     TIMER_OP: 'theater/timer/op',
     TIMER_CD: 'theater/timer/cd',
     TIMER_CD_ADJUST: 'theater/timer/cd/adjust',
+  },
+  V1: {
+    HOSPITALS: 'api/v1/hospitals',
+    HOSPITAL_BY_ID: (id: number) => `api/v1/hospitals/${id}`,
+    HOSPITAL_ROOMS: (hospitalId: number) => `api/v1/hospitals/${hospitalId}/rooms`,
+    ROOMS: 'api/v1/rooms',
+    ROOM_BY_ID: (id: number) => `api/v1/rooms/${id}`,
+    DASHBOARD_ROOM: (roomId: number) => `api/v1/dashboard/rooms/${roomId}`,
+    DASHBOARD_TIMER_OP: (roomId: number) => `api/v1/dashboard/rooms/${roomId}/timer/op`,
+    DASHBOARD_TIMER_CD: (roomId: number) => `api/v1/dashboard/rooms/${roomId}/timer/cd`,
+    DASHBOARD_TIMER_CD_ADJUST: (roomId: number) => `api/v1/dashboard/rooms/${roomId}/timer/cd/adjust`,
   },
   ADMIN: {
     USERS: 'admin/users',

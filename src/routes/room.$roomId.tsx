@@ -1,4 +1,4 @@
-import { createFileRoute, redirect } from '@tanstack/react-router'
+import { createFileRoute, redirect, Link } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 import { roomService } from '@/services/room.service'
 import { AppLayout } from '@/components/AppLayout'
@@ -6,12 +6,21 @@ import { SensorCard } from '@/components/SensorCard'
 import { ACHWidget } from '@/components/ACHWidget'
 import { StopwatchWidget } from '@/components/StopwatchWidget'
 import { CountdownWidget } from '@/components/CountdownWidget'
-import { Loader2, Thermometer, Droplets, Gauge, Wind, Activity, Beaker } from 'lucide-react'
+import { Loader2, Thermometer, Droplets, Gauge, Wind, Activity, Beaker, ArrowLeft } from 'lucide-react'
 import { getSensorStatus } from '@/lib/utils'
 import { SENSOR_THRESHOLDS } from '@/lib/constants'
 import { useAuthStore } from '@/store/auth'
 
+type SearchParams = {
+  hospital?: number
+}
+
 export const Route = createFileRoute('/room/$roomId')({
+  validateSearch: (search: Record<string, unknown>): SearchParams => {
+    return {
+      hospital: search.hospital ? Number(search.hospital) : undefined,
+    }
+  },
   beforeLoad: ({ context }) => {
     // Require authentication
     if (!context.auth.isAuthenticated()) {
@@ -23,21 +32,42 @@ export const Route = createFileRoute('/room/$roomId')({
 
 function RoomPage() {
   const { roomId } = Route.useParams()
+  const searchParams = Route.useSearch()
   const isAdmin = useAuthStore((state) => state.isAdmin)
+  const numericRoomId = Number(roomId)
 
   const { data, isLoading, isError } = useQuery({
-    queryKey: ['room-state', roomId],
-    queryFn: () => roomService.getRoomState(roomId),
+    queryKey: ['room-state', numericRoomId],
+    queryFn: () => roomService.getRoomState(numericRoomId),
     refetchInterval: 2000, // Poll every 2 seconds for live data
   })
 
   return (
     <AppLayout>
       <div className="space-y-6">
-        {/* Header */}
+        {/* Header with breadcrumb */}
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Room: {roomId}</h1>
-          <p className="text-gray-600 mt-1">Real-time monitoring and controls</p>
+          <Link
+            to="/"
+            search={{ hospital: searchParams.hospital }}
+            className="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 mb-2"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back to Dashboard
+          </Link>
+          {data?.room ? (
+            <>
+              <h1 className="text-3xl font-bold text-gray-900">{data.room.room_name}</h1>
+              <p className="text-gray-600 mt-1">
+                {data.room.hospital.name} • {data.room.room_code}
+              </p>
+            </>
+          ) : (
+            <>
+              <h1 className="text-3xl font-bold text-gray-900">Room {roomId}</h1>
+              <p className="text-gray-600 mt-1">Real-time monitoring and controls</p>
+            </>
+          )}
         </div>
 
         {isLoading ? (
@@ -91,6 +121,7 @@ function RoomPage() {
                 theoretical={data.ach_theoretical}
                 empirical={data.ach_empirical}
                 ahuCycleStartTime={data.ahu_cycle_start_time}
+                logicAhu={data.current_logic_ahu}
               />
 
               {/* Medical Gases */}
@@ -152,8 +183,8 @@ function RoomPage() {
             {/* Timer Widgets - Right side (1/3 width on large screens) */}
             {isAdmin() && (
               <div className="space-y-6">
-                <StopwatchWidget roomId={roomId} roomState={data} />
-                <CountdownWidget roomState={data} />
+                <StopwatchWidget roomId={numericRoomId} roomState={data} />
+                <CountdownWidget roomId={numericRoomId} roomState={data} />
               </div>
             )}
           </div>

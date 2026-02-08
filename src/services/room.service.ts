@@ -18,27 +18,27 @@ interface CountdownTimerAction {
 }
 
 export const roomService = {
-  async getRoomState(roomId: string): Promise<TheaterState> {
-    const response = await api.get(`${API_ENDPOINTS.THEATER.STATE}?room=${roomId}`).json<TheaterStateResponse>()
+  async getRoomState(roomId: number): Promise<TheaterState> {
+    const response = await api.get(API_ENDPOINTS.V1.DASHBOARD_ROOM(roomId)).json<TheaterStateResponse>()
     return response.data
   },
 
-  async controlTimer(roomId: string, action: TimerAction): Promise<string> {
-    const response = await api.post(API_ENDPOINTS.THEATER.TIMER_OP, {
-      json: { ...action, room: roomId },
-    }).json<TimerResponse>()
-    return response.message
-  },
-
-  async controlCountdownTimer(roomId: string, action: CountdownTimerAction): Promise<string> {
-    const response = await api.post(`${API_ENDPOINTS.THEATER.TIMER_CD}?room=${roomId}`, {
+  async controlTimer(roomId: number, action: TimerAction): Promise<string> {
+    const response = await api.post(API_ENDPOINTS.V1.DASHBOARD_TIMER_OP(roomId), {
       json: action,
     }).json<TimerResponse>()
     return response.message
   },
 
-  async adjustCountdownTimer(roomId: string, minutes: 1 | -1): Promise<string> {
-    const response = await api.patch(`${API_ENDPOINTS.THEATER.TIMER_CD_ADJUST}?room=${roomId}`, {
+  async controlCountdownTimer(roomId: number, action: CountdownTimerAction): Promise<string> {
+    const response = await api.post(API_ENDPOINTS.V1.DASHBOARD_TIMER_CD(roomId), {
+      json: action,
+    }).json<TimerResponse>()
+    return response.message
+  },
+
+  async adjustCountdownTimer(roomId: number, minutes: 1 | -1): Promise<string> {
+    const response = await api.patch(API_ENDPOINTS.V1.DASHBOARD_TIMER_CD_ADJUST(roomId), {
       json: { minutes },
     }).json<TimerResponse>()
     return response.message
