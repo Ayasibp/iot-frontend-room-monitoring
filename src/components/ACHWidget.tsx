@@ -16,7 +16,17 @@ export function ACHWidget({
   ahuCycleStartTime,
 }: ACHWidgetProps) {
   const [elapsedTime, setElapsedTime] = useState(0)
+  const [currentTime, setCurrentTime] = useState(new Date())
   const isMeasuring = ahuCycleStartTime !== null
+
+  // Update current time every second
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(new Date())
+    }, 1000)
+
+    return () => clearInterval(timer)
+  }, [])
 
   useEffect(() => {
     if (!ahuCycleStartTime) {
@@ -43,6 +53,23 @@ export function ACHWidget({
     }
   }, [ahuCycleStartTime])
 
+  // Format time as HH:MM:SS
+  const formatTime = (date: Date) => {
+    const hours = date.getHours().toString().padStart(2, '0')
+    const minutes = date.getMinutes().toString().padStart(2, '0')
+    const seconds = date.getSeconds().toString().padStart(2, '0')
+    return `${hours}:${minutes}:${seconds}`
+  }
+
+  // Format date as DD MMM YYYY
+  const formatDate = (date: Date) => {
+    const day = date.getDate().toString().padStart(2, '0')
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+    const month = months[date.getMonth()]
+    const year = date.getFullYear()
+    return `${day} ${month} ${year}`
+  }
+
   return (
     <Card className="border-2 border-purple-200">
       <CardHeader>
@@ -51,6 +78,14 @@ export function ACHWidget({
             <Activity className="h-5 w-5 text-purple-600" />
             Air Changes per Hour (ACH)
           </CardTitle>
+          <div className="text-right">
+            <div className="text-lg font-semibold text-gray-800 font-mono">
+              {formatTime(currentTime)}
+            </div>
+            <div className="text-sm text-gray-600">
+              {formatDate(currentTime)}
+            </div>
+          </div>
         </div>
       </CardHeader>
       <CardContent>
@@ -94,8 +129,7 @@ export function ACHWidget({
             ) : (
               <div className="space-y-2">
                 <div className="text-4xl font-bold text-purple-600">
-                  {empirical.toFixed(2)}
-                  <span className="text-lg text-gray-500 ml-2">ACH</span>
+                  {formatDuration(0)}
                 </div>
                 <p className="text-xs text-gray-500">
                   Based on measured cycle time

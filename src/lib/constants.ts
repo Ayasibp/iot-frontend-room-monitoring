@@ -21,6 +21,8 @@ export const API_ENDPOINTS = {
   THEATER: {
     STATE: 'theater/state',
     TIMER_OP: 'theater/timer/op',
+    TIMER_CD: 'theater/timer/cd',
+    TIMER_CD_ADJUST: 'theater/timer/cd/adjust',
   },
   ADMIN: {
     USERS: 'admin/users',
